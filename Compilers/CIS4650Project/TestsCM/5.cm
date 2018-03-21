@@ -1,0 +1,20 @@
+/******************************
+5.cm
+Name: Jireh Agda (0795472)
+Date Created: 2017 04 05
+     Last Modified: 2017 04 05
+C- Test File #5 - Error File #1
+Errors - Lexical Focus
+******************************/
+
+/* Identifiers never have digits */
+int func21;
+
+int func2 (void) {
+    int normal;
+    ints bad;           /* ints is not a named type, will be treated as identifier -> syntax error */
+
+    /* Keywords like if are hidden in here */
+    normal = normal * normal;
+    bad = bad @ bad;    /* @ is not a binary operation (that is supported) */
+} 

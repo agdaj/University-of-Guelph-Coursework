@@ -1,0 +1,17 @@
+/*******************************
+0.cm
+Name: Jireh Agda (0795472)
+Date Created: 2017 04 05
+     Last Modified: 2017 04 05
+C- Test File #10 - Error File #6
+Errors - Runtime Error Potential
+*******************************/
+
+int x[10];
+
+void main (void) {
+    int y;
+    y = input();    /* y can be entered as an out-of-bounds number */
+    x[y] = 1;
+    output(x[y]);
+}

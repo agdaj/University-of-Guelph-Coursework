@@ -1,0 +1,96 @@
+*********************************************************
+Jireh Agda               0795472
+CIS*4650                 Warm-Up Assignment: SGML Scanner
+Date Due: 2017 02 02
+*********************************************************
+
+Code inspired by java_sample.tgz sample provided by Dr. Fei Song - CIS*4650
+
+***************************************
+Problem Description and Program Purpose
+***************************************
+This program is intended to be able to scan through an SGML (Standard Generalized Markup Langauge) document
+and selectively filter and output document content as determined by a pre-determined set of relevant tags,
+as well as check the document's nesting structure.
+
+
+***************************
+Assumptions and Limitations
+***************************
+One assumption my program makes is that if there are no irrelevant tags in the global stack, then there is no
+filtering of content. With this, even if there are no tags in the stack (such as in the beginning or ending of
+a file), content is still printed to output, even if content there is also not meant to be put to output.
+
+Another assumption my program makes is that close-tags will always begin with </, and there cannot be space in
+between those characters. This allows open-tags to contain / anywhere in the tag other than as the first character,
+such as if the character appears as an part of an attribute value, but it may be mistaken as such even if the tag
+was supposed to be CLOSE-TAG. Tags must also start and finish on the same line, else these components are treated separately.
+
+One limitation of my program is that in recognizing APOSTROPHE words, a hyphenated sequence with an apostrophe suffix
+('[a-zA-Z0-9]+) is tokenized as an APOSTROPHE, but words with an apostrophe at the end (such as s') will separate
+the apostrophe as a PUNCTUATION token (such as Marcus').
+
+Another limitation of my program is that it allows for tag names to be empty (eg. <>), even though this is more
+likely an error and is not practical, and the scanner would not send an appropriate error message.
+
+
+********************************
+Building and Running ScannerSGML
+********************************
+To build ScannerSGML (to create ScannerSGML.class), type make or make all from the agdaj_a1 directory.
+To rebuild, type "make clean" then "make" again.
+
+To run ScannerSGML on an input file, type "java ScannerSGML < <your_input_file>" at the agdaj_a1 directory
+or designate a class path using a -cp argument to the .class file.
+
+
+*********************************
+Testing Procedures and Test Cases
+*********************************
+The testing of this program is modularized into 4 parts which together cover the scope of the program and test for
+errors and correctness of an SGML document.
+
+First, the program is tested to see if it can correctly recognize OPEN-TAG and CLOSE-TAG tokens of any kind. Case
+sensitivity of simple tags such as <Doc> and </dOC> are tested first. Digits are then added to tags, then afterwards
+various attribute-value pairs are tested to see if OPEN-TAG printing includes it or not. Lastly, spaces are added to
+the ends of the tag names, and regressively checked to see if all previous cases still hold.
+
+After tag recognition testing is done, the stack and tag nesting is tested to see if fully nested documents give clean
+output while errors in matching tags are reported (in System.err). Various nesting combinations are tested, such as
+fully nested (<DOC><P></P></DOC>), staggered tag nesting (<DOC><P></DOC></P>), and uneven tag match sets. Unmatched
+CLOSE-TAG tokens are tested to see if they are ignored by the stack, but reported as an error, as well as testing if
+an error is reported if there are tags in the stack after an SGML document is finished processing.
+
+When stack testing and tag nesting is validated, the output is evaluated to see if relevancy is considered, and
+irrelevant tags are filtered out and not sent to output (but is still checked for tag nesting and matching). Relevant
+tags are placed within irrelevant tag nesting to see if they will be printed or not (they should not be printed). As well,
+irrelevant tags are tested to see if they are not printed at all. Random content is also placed within relavant and
+irrelevant sections to test which content is printed and which aren't.
+
+Finally, once relevancy testing is complete, the embedded text content is tested to see if the content is categorized
+and tokenized appropriately. WORD and NUMBER tokens are investigated first, to see if the presence of any alphabetic
+character categorizes a token to WORD, even though the token may contain numbers. For NUMBER, various sign combinations
+and integer/real combinations are tested to see if they are recognized as NUMBER. HYPHENATED and APOSTROPHIZED tokens are 
+tested next, with hyphens and apostrophes added at the beginning, end and in the middle of WORDs, to test where the
+boundaries are between HYPHENATED/APOSTROPHIZED and PUNCTUATION (hyphens and apostrophes must have alphanumeric characters
+on both sides to be part of a HYPHENATED/APOSTROPHIZED token). Lastly, APOSTROPHIZED suffixes are tested on otherwise
+HYPHENATED tokens to test if they will instead be tokenized as APOSTROPIHZED (one apostrophe set - no other combinations
+are allowed).
+
+When all these tests are passed, the testing should be complete.
+
+
+**********************
+Potential Improvements
+**********************
+One potential improvement of the overall problem description of SGML and implementation is that ability to filter
+through a special character, like many other programming languages.
+
+Another potential improvement for the purposes of usage moving forward, the implementation of a table look-up for
+relevant and irrelevant tags would allow the code to be more generic to the tags and prevent hard-coding checks of
+specific tags as done in this assignment.
+
+Another potential improvement to my program specfically is a mechanism to prevent empty tags from being validated (ie.
+create an error message when found) as empty tags are most likely errors and are not practical. The regular expressions
+for the tags are set up to be able to accept a wide variety of tag names and structure, including attribute values,
+but it also allows for empty tags to be valid and checked for nesting.

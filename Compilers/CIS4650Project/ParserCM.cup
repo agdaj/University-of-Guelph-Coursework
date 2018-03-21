@@ -1,0 +1,437 @@
+/******************************************
+ParserCM.cup -> parser.java + sym.java
+Name: Jireh Agda (0795472)
+Date Created: 2017 03 03
+     Last Modified: 2017 03 19
+C-Minus CUP Specification File
+Compiler Project - CIS*4650
+To Build: java java_cup.Main < ParserCM.cup
+******************************************/
+
+/* Preliminary Declarations Section */
+   
+/* Import needed classes to support C- parsing  */
+import java_cup.runtime.*;
+import AbSynCM.*;
+   
+/* New parser code -> change the way the parser reports errors (to include
+   line and column number of the error) and add flag for parsing error stops */
+parser code {:
+    public static int goodParse = 1;    //Flag to abort compilation after parsing
+
+    /* Change report_error so that it includes the line and column of the
+       location of the error, along with the passed-in message */
+    public void report_error (String message, Object info) {
+   
+        /* Create a StringBuffer called 'm' with the string 'Error' in it. */
+        StringBuffer m = new StringBuffer ("Error");
+   
+        /* Check if the information passed to the method is the same
+           type as the type java_cup.runtime.Symbol. */
+        if (info instanceof java_cup.runtime.Symbol) {
+            /* Typecast info into a java_cup.runtime.Symbol object 's'
+               to retrieve its information */
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+            /* Check if the line number in the input is greater or
+               equal to zero. */
+            if (s.left >= 0) {
+                /* Add to the end of the StringBuffer error message
+                   the line number of the error in the input. */
+                m.append (" in line " + (s.left + 1));   
+                /* Check if the column number in the input is greater
+                   or equal to zero. */
+                if (s.right >= 0)                    
+                    /* Add to the end of the StringBuffer error message
+                       the column number of the error in the input. */
+                    m.append (", column " + (s.right + 1));
+            }
+        }
+   
+        /* Append passed-in message to error message and print to stderr */
+        m.append(" : " + message);
+        System.err.println(m);
+    }
+   
+    /* Change report_fatal_error so that it includes the line and column number of 
+       the location of the fatal error along with the error message (by calling
+       report_error) before exiting */
+    public void report_fatal_error (String message, Object info) {
+        report_error (message, info);
+        System.exit (1);
+    }
+
+    /* Change syntax_error so that it the message is not just "Syntax error" generically
+       and will instead include Symbol info in the message */
+    public void syntax_error (Symbol cur_token) {
+        String message = "Syntax error with ";
+        switch (cur_token.sym) {
+            case sym.INT: 
+                message = message.concat ("INT");
+                break;
+            case sym.VOID:
+                message = message.concat ("VOID");
+                break;
+            case sym.RETURN:
+                message = message.concat ("RETURN");
+                break;
+            case sym.IF:
+                message = message.concat ("IF");
+                break;
+            case sym.ELSE:
+                message = message.concat ("ELSE");
+                break;
+            case sym.WHILE:
+                message = message.concat ("WHILE");
+                break;
+            case sym.PLUS:
+                message = message.concat ("PLUS");
+                break;
+            case sym.MINUS:
+                message = message.concat ("MINUS");
+                break;
+            case sym.MUL:
+                message = message.concat ("MUL");
+                break;
+            case sym.DIV:
+                message = message.concat ("DIV");
+                break;
+            case sym.LT:
+                message = message.concat ("LT");
+                break;
+            case sym.LE:
+                message = message.concat ("LE");
+                break;
+            case sym.GT:
+                message = message.concat ("GT");
+                break;
+            case sym.GE:
+                message = message.concat ("GE");
+                break;
+            case sym.EQ:
+                message = message.concat ("EQ");
+                break;
+            case sym.NE:
+                message = message.concat ("NE");
+                break;
+            case sym.ASSIGN:
+                message = message.concat ("ASSIGN");
+                break;
+            case sym.SEMI:
+                message = message.concat ("SEMI");
+                break;
+            case sym.COMMA:
+                message = message.concat ("COMMA");
+                break;
+            case sym.LPAREN:
+                message = message.concat ("LPAREN");
+                break;
+            case sym.RPAREN:
+                message = message.concat ("RPAREN");
+                break;
+            case sym.LBRACK:
+                message = message.concat ("LBRACK");
+                break;
+            case sym.RBRACK:
+                message = message.concat ("RBRACK");
+                break;
+            case sym.LBRACE:
+                message = message.concat ("LBRACE");
+                break;
+            case sym.RBRACE:
+                message = message.concat ("RBRACE");
+                break;
+            case sym.ID:
+                message = message.concat ("ID");
+                break;
+            case sym.NUM:
+                message = message.concat ("NUM");
+                break;
+            case sym.ERROR:
+                message = message.concat ("ERROR");
+                break;
+            case sym.error:
+                message = message.concat ("error");
+                break;
+            default:
+                message = message.concat ("null");
+        }
+        report_error (message, cur_token);
+    }
+:};
+   
+   
+/* Declaration of Terminals, Non Terminals and Precedence Section */
+
+terminal INT, VOID, RETURN, IF, ELSE, WHILE;
+terminal PLUS, MINUS, MUL, DIV, LT, LE, GT, GE, EQ, NE, ASSIGN;
+terminal SEMI, COMMA, LPAREN, RPAREN, LBRACK, RBRACK, LBRACE, RBRACE;
+terminal String ID, NUM;
+terminal ERROR;
+   
+non terminal DecList     program, decl_list;
+non terminal Dec         decl, func_decl;
+non terminal VarDecList  params, param_list, loc_decl;
+non terminal VarDec      var_decl, param;
+non terminal ExpList     stmt_list, args, arg_list;
+non terminal Exp         statement, exp, exp_stmt, select_stmt, iter_stmt, ret_stmt, sim_exp, call;
+non terminal CompoundExp comp_stmt;
+non terminal Var         var;
+non terminal NameTy      type_spec;   
+
+precedence left     ERROR, error;              /* immediately reduce an error operation, 'save' the rest of the expression */
+precedence right    ELSE;                      /* explicitly state a (higher) precedence level of else to
+                                                  automatically disambiguate dangling-else (-> most closely nested) */
+precedence right    ASSIGN;                    /* prioritize resolution of right side before assigning */
+precedence nonassoc LT, LE, GT, GE, EQ, NE;    /* allow associativity for ASSIGN, is of lower precedence */
+precedence left     PLUS, MINUS;
+precedence left     MUL, DIV;
+
+/* Grammar Section - Store Syntax to an Abstract Tree + Error Recovery */
+   
+program	     ::= decl_list:dList
+                 {: RESULT = dList; :}
+               ;
+
+decl_list    ::= decl_list:dList decl:decl
+                 {: DecList d = dList;
+                    while (d.tail != null)
+                      d = d.tail;
+                    d.tail = new DecList (decl, null);
+                    RESULT = dList;
+                 :}
+               | decl:decl
+                 {: RESULT = new DecList (decl, null); :}
+               ;
+
+decl         ::= var_decl:vDecl
+                 {: RESULT = vDecl; :}
+               | func_decl:fDecl
+                 {: RESULT = fDecl; :}
+               | error
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+var_decl     ::= type_spec:typeSpec ID:id SEMI
+                 {: RESULT = new SimpleDec (typeSpecleft, typeSpec, id); :}
+               | type_spec:typeSpec ID:id LBRACK NUM:arrayNum RBRACK SEMI
+                 {: RESULT = new ArrayDec (typeSpecleft, typeSpec, id, new IntExp (arrayNumleft, Integer.parseInt(arrayNum))); :}
+               ;
+
+type_spec    ::= INT:i
+                 {: RESULT = new NameTy (ileft, NameTy.INT); :}
+               | VOID:v
+                 {: RESULT = new NameTy (vleft, NameTy.VOID); :}
+               | error
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+func_decl    ::= type_spec:typeSpec ID:id LPAREN params:params RPAREN comp_stmt:cStmt
+                 {: RESULT = new FunctionDec (typeSpecleft, typeSpec, id, params, cStmt); :}
+               | type_spec ID LPAREN error RPAREN comp_stmt
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+params       ::= param_list:pList
+                 {: RESULT = pList; :}
+               | VOID:v
+                 {: RESULT = null; :}
+               ;
+
+param_list   ::= param_list:pList COMMA param:p
+                 {: VarDecList v = pList;
+                    while (v.tail != null)
+                      v = v.tail;
+                    v.tail = new VarDecList (p, null);
+                    RESULT = pList;
+                 :}
+               | param:p
+                 {: RESULT = new VarDecList (p, null); :}
+               | error COMMA param:p
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+param        ::= type_spec:typeSpec ID:id
+                 {: RESULT = new SimpleDec (typeSpecleft, typeSpec, id); :}
+               | type_spec:typeSpec ID:id LBRACK RBRACK
+                 {: RESULT = new ArrayDec (typeSpecleft, typeSpec, id, null); :}
+               ;
+
+comp_stmt    ::= LBRACE:lb loc_decl:lDecl stmt_list:sList RBRACE
+                 {: RESULT = new CompoundExp (lbleft, lDecl, sList); :}
+               ;
+
+loc_decl     ::= loc_decl:lDecl var_decl:vDecl
+                 {: VarDecList l = lDecl;
+                    if (l == null)
+                        RESULT = new VarDecList (vDecl, null);
+                    else {
+                        while (l.tail != null)
+                            l = l.tail;
+                        l.tail = new VarDecList (vDecl, null);
+                        RESULT = lDecl;
+                    }
+                 :}
+               | /* empty */
+                 {: RESULT = null; :}
+               ;
+
+stmt_list    ::= stmt_list:sList statement:stmt
+                 {: ExpList e = sList;
+                    if (e == null)
+                        RESULT = new ExpList (stmt, null);
+                    else {
+                        while (e.tail != null)
+                            e = e.tail;
+                        e.tail = new ExpList (stmt, null);
+                        RESULT = sList;
+                    }
+                 :}
+               | /* empty */
+                 {: RESULT = null; :}
+               ;
+
+statement    ::= exp_stmt:eStmt
+                 {: RESULT = eStmt; :}
+               | comp_stmt:cStmt
+                 {: RESULT = cStmt; :}
+               | select_stmt:sStmt
+                 {: RESULT = sStmt; :}
+               | iter_stmt:iStmt
+                 {: RESULT = iStmt; :}
+               | ret_stmt:rStmt
+                 {: RESULT = rStmt; :}
+               | error
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+exp_stmt     ::= exp:exp SEMI
+                 {: RESULT = exp; :}
+               | SEMI:s
+                 {: RESULT = new NilExp (sleft); :}
+               ;
+
+select_stmt  ::= IF:i LPAREN exp:exp RPAREN statement:stmt
+                 {: RESULT = new IfExp (ileft, exp, stmt, null); :}
+               | IF:i LPAREN exp:exp RPAREN statement:stmt1 ELSE:e statement:stmt2
+                 {: RESULT = new IfExp (ileft, exp, stmt1, stmt2); :}
+               | IF LPAREN error RPAREN
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+iter_stmt    ::= WHILE:w LPAREN exp:exp RPAREN statement:stmt
+                 {: RESULT = new WhileExp (wleft, exp, stmt); :}
+               | WHILE LPAREN error RPAREN
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+ret_stmt     ::= RETURN:r SEMI
+                 {: RESULT = new ReturnExp (rleft, new NilExp(rleft)); :}
+               | RETURN:r exp:exp SEMI
+                 {: RESULT = new ReturnExp (rleft, exp); :}
+               | RETURN error SEMI
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+/* Modification of C- Specification, where precedence can be used */
+/* Order from top to bottom reflects precedence from last to resolve to first to resolve */
+exp          ::= var:var ASSIGN exp:exp
+                 {: RESULT = new AssignExp (varleft, var, exp); :}
+               | exp:exp1 LT exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.LT, exp2); :}
+               | exp:exp1 LE exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.LE, exp2); :}
+               | exp:exp1 GT exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.GT, exp2); :}
+               | exp:exp1 GE exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.GE, exp2); :}
+               | exp:exp1 EQ exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.EQ, exp2); :}
+               | exp:exp1 NE exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.NE, exp2); :}
+               | exp:exp1 PLUS exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.PLUS, exp2); :}
+               | exp:exp1 MINUS exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.MINUS, exp2); :}
+               | exp:exp1 MUL exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.MUL, exp2); :}
+               | exp:exp1 DIV exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.DIV, exp2); :}
+               | exp:exp1 ERROR:err exp:exp2
+                 {: RESULT = new OpExp (exp1left, exp1, OpExp.ERROR, exp2);
+                    parser.syntax_error (new Symbol(sym.ERROR, errleft, errright));
+                    parser.goodParse = 0;
+                 :}
+               | sim_exp:exp
+                 {: RESULT = exp; :}
+               ;
+
+var          ::= ID:id
+                 {: RESULT = new SimpleVar (idleft, id); :}
+               | ID:id LBRACK exp:exp RBRACK
+                 {: RESULT = new IndexVar (idleft, id, exp); :}
+               | ID LBRACK error RBRACK
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+sim_exp      ::= LPAREN exp:exp RPAREN
+                 {: RESULT = exp; :}
+               | var:v
+                 {: RESULT = new VarExp (vleft, v); :}
+               | call:c
+                 {: RESULT = c; :}
+               | NUM:n
+                 {: RESULT = new IntExp (nleft, Integer.parseInt(n)); :}
+               | LPAREN error RPAREN
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+
+call         ::= ID:id LPAREN args:a RPAREN
+                 {: RESULT = new CallExp (idleft, id, a); :}
+               | ID LPAREN error RPAREN
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ; 
+
+args         ::= arg_list:aList
+                 {: RESULT = aList; :}
+               | /* empty */
+                 {: RESULT = null; :}
+               ;
+
+arg_list     ::= arg_list:aList COMMA exp:exp
+                 {: ExpList e = aList;
+                    while (e.tail != null)
+                        e = e.tail;
+                    e.tail = new ExpList (exp, null);
+                    RESULT = aList;
+                 :}
+               | exp:exp
+                 {: RESULT = new ExpList (exp, null); :}
+               | error COMMA exp:exp
+                 {: RESULT = null;
+                    parser.goodParse = 0;
+                 :}
+               ;
+

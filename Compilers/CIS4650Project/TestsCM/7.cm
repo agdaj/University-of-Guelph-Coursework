@@ -1,0 +1,29 @@
+/**********************************
+7.cm
+Name: Jireh Agda (0795472)
+Date Created: 2017 03 05
+     Last Modified: 2017 03 06
+C- Test File #7 - Error File #3
+Errors - Undefined/Redefined Errors
+**********************************/
+
+int x;
+void x;                /* Redefine error on variable x */
+
+void badFunc(int x)
+{
+    y = 15;            /* Undefined error on y */
+}
+
+int y;
+
+void badFunc(void)     /* Redefine error on function badFunc */
+{
+    y = 7;
+}
+
+void main(void)
+{
+    y = 2;
+    badFunc(y);   
+}

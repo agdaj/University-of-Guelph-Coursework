@@ -1,0 +1,125 @@
+******************************************************
+Jireh Agda               0795472
+CIS*2750                 A4: Dialogc - Release Version
+Date Due: 2015 03 29 
+******************************************************
+
+*****************
+Compiling Dialogc
+*****************
+To compile Dialogc, type make, make all or make Dialogc from the a3 directory.
+The class file Dialogc.class, PostgresLogin.class the shared library libJNIpm.so and the executable yadc will be created at the Dialogc root directory.
+
+
+***************
+Running Dialogc
+***************
+To run Dialogc, type java Dialogc at the root directory or designate a class path (-cp) to the .class file.
+
+To run yadc separately, type <the directory to yadc>/yadc <the .config file> <existing directory>.
+
+
+*****************
+File Descriptions
+*****************
+README:
+README contains instructions of how to compile and run Dialogc, as well as relevant notes about the contents of the Dialogc root directory.
+
+Makefile:
+Makefile contains compilation commands to construct the libJNIpm.so library, the yadc executable, PostgresLogin.class and Dialogc.class.
+
+pledge.txt:
+pledge.txt contains the pledge of academic honesty of this assignment. 
+
+linkedListADT.h:
+linkedListADT.h contains the ADT details and function prototypes for the list ADT. 
+
+hashTableADT.h:
+hashTableADT.h contains the ADT details and function prototypes for the hash table ADT.
+
+booleanADT.h:
+booleanADT.h contains the definition of the Boolean ADT.
+
+ParameterManager.h:
+ParameterManager.h contains the ADT details and function prototypes (including the desired interface) of the ParameterList and ParameterManager ADT.
+
+Dialogc.h:
+Dialogc.h contains the JNI headers and other definitions needed for the implementation of DialogcToPMJNI.c.
+
+DialogcToPMJNI.c:
+DialogcToPMJNI.c implements the methods Dialogc will use to levearage the C library of ParameterManager (libpm.a).
+
+libpm.a:
+libpm.a contains the ParameterManager function definitions and object files necessary for the compilation of DialogcToPMJNI.c to .o to be compiled into a shared library (.so).
+
+Dialogc.java:
+Dialogc.java implements the main GUI framework of a .config file editor and compiler so that a user can create a separate GUI.
+
+compile.gif, compileRun.gif, new.gif, open.gif, quit.png, save.gif, saveAs.gif:
+These files are image files that are loaded onto the Dialogc GUI for looks...
+new.gif, open.gif, save.gif, saveAs.gif from http://www.oracle.com/technetwork/java/tbg-general-141722.html
+compileRun.gif from http://www.oracle.com/technetwork/java/tbg-media-137102.html
+quit.png from http://www.iconki.com/16x16-application-icons-358-p6.asp
+compile.gif from http://www.iconki.com/16x16-application-icons-358-p18.asp
+
+yadc.l:
+yadc.l specifies to lex the kind of tokens to look for within a given stream to be used by yacc.
+
+yadc.y:
+yadc.y specifies to yacc the grammar expected from a .config file to successfully convert its contents to an interface and a main GUI class.
+
+PostgresLogin.java, krb5.conf, jaas.conf:
+These files help Dialogc connect to a Postgres database given proper authentication.
+
+
+***************************
+Assumptions and Limitations
+***************************
+When creating, opening or saving a file, .config will be the only filter available, to indicate that the only type of files that the program deals is in .config.
+
+If the user quits the program and your progress is saved, the program will exit immediately, there is no confirm to quit button. The program will ask for a save if the
+current file is not saved.
+
+When entering a name to the file chooser dialog, the user can add the .config extension yourself or not, the extension will be appended to the name if it's not there.
+
+Mnemonics and accelerators can be used to access the menu. To use mnemonics, type ALT+the designated key. To use accelerators, type CTRL+the designated key.
+
+The .config file will not be compiled if the fields or buttons list is empty. There needs to be a minimum of 1 field and 1 button to compile.
+i.e. There cannot be blank lists
+
+If the compile process is stopped before completion but after some lines have been generated, the lines will remain and the file is left incomplete.
+
+The program assumes that the designated comment character is '#', and will treat other misplaced characters as a parse error.
+
+If the user types in working directory with trailing empty space but ends with a /, the program assumes the entirety of the directory name includes the excess spaces.
+
+The .java files will not be compiled or will not run if the proper arguments are not given and/or if the required files (Listeners) are not within the working directory.
+
+Field and button names cannot have whitespace within it, else either compiler will treat it as a parse error due to its inability to match string values with whitespace and parameters ahead.
+Field names also cannot start with a number if database integration is requested.
+
+There cannot be duplicate names between the fields and buttons, else the parsing will treat that as a duplicate parameter declaration.
+
+Lex/Yacc Limitations:
+The title, fields and buttons parameter must be ahead of the other parameters else it is a parse error.
+
+The lex/yacc compiler can only accept parameters consisting of digits, underscores and/or letters only.
+
+No value in quotes can have '\n' (including the title), else the compiler will give a parse error.
+
+Finding an unregistered parameter will result in a parse error with the lex/yacc compiler.
+
+Database Integration Limitations:
+Reserved button names cannot be set to have another ActionListener and the program will only produce the exact ActionListener required.
+Any ActionListener noted in the .config file will be ignored or seen as a parse error.
+
+String fields cannot exceed 30 characters and float fields cannot exceed 10^17 of precision.
+
+Logging in to the Postgres database occurs when you run a compiled file, before the main GUI appears.
+
+Installer Limitations:
+You cannot have both --build and --install flags, only 0 or 1 flags are accepted.
+
+The installer will not work if run from outside the directory it is in.
+
+The installer may delete the installed directory if you choose to install it in the directory of the installer itself.

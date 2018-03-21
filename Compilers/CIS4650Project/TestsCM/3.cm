@@ -1,0 +1,23 @@
+/******************************
+3.cm
+Name: Jireh Agda (0795472)
+Date Created: 2017 04 04
+     Last Modified: 2017 04 04
+C- Test File #3 - Clean File #3
+Copy of fac.cm
+******************************/
+
+void main(void) {
+  int x; int fac;
+
+  x = input();
+  fac = 1;
+
+  while (x > 1) {
+    fac = fac * x;
+    x = x - 1;
+  }
+
+  output(fac);
+}
+

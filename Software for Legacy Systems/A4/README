@@ -1,0 +1,15 @@
+****************************
+CIS3190 Assignment 4
+Author: Jireh Agda (0795472)
+****************************
+
+*********************************
+Compiling and Running eightQueens
+*********************************
+The zip file contains the Ada, C, and Fortran implementations of eightQall.pas, as well
+as a Makefile that compiles the programs, and a Python script to allow easy running of
+the programs.
+
+As given in the Makefile, the Python script likely requires chmod 755 eightQueens.py, and python3
+is used as its interpreter. Ideally, the Makefile will run all the compilation steps and a chmod 755
+command on the python script once the programs are compiled, just by typing in 'make'.

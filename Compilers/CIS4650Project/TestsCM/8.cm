@@ -1,0 +1,22 @@
+/************************************
+8.cm
+Name: Jireh Agda (0795472)
+Date Created: 2017 04 05
+     Last Modified: 2017 04 05
+C- Test File #8 - Error File #4
+Errors - Function Call, Return Errors
+************************************/
+
+int addTwo (int x, int y)
+{
+    int z;
+    z = x + y;
+    return;                      /* Return is a void value, not int */
+}
+
+void main(void)
+{
+    int x; void y; int z;        /* Var y matches void arg to int param */
+    x = addTwo (x + 2, y, z);    /* Too many arguments to addTwo function */
+    output(z);
+}

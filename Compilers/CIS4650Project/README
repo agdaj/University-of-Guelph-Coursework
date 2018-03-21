@@ -1,0 +1,78 @@
+******************************************************************
+Jireh Agda               0795472
+CIS*4650                 C- Project Checkpoint 3: TM Assembly Code
+Date Due: 2017 04 05
+******************************************************************
+
+Code inspired by java_tiny.tar sample provided by Dr. Fei Song - CIS*4650
+
+***************************************
+Problem Description and Program Purpose
+***************************************
+This program (cm) is intended to be able to fully compile a C- (.cm) specification file from text (code) into assembly
+instructions to be run on a TMmachine. C- is a simplified C programming languagues with some advanced features removed.
+Compilation can be optionally halted at different steps to produce an (intermediary) output file using command line arguments.
+As of this checkpoint, the -a flag, the -s flag, and the -c flag has been implemented.
+
+
+***********************
+Building and Running cm
+***********************
+To build cm (to create cm.class), type make or make all from the agdaj_c1 directory.
+To rebuild, type "make clean" then "make" again.
+
+To run cm on an input file (.cm), type "java -classpath /usr/share/java/cup.jar:. cm [-a|-s|-c] <your_input_file>.cm"
+at the agdaj_c1 directory. The arguments -a, -s, and -c does as follows:
+-a: perform syntactic analysis and output an abstract syntax tree -> .abs
+-s: perform type checking and output symbol tables -> .sym
+-c: compile and output TM assembly language code -> .tm
+Inputting no arguments runs the compiler to completion.
+
+
+***********************************
+Testing Instructions and Test Files
+***********************************
+Testing of this program can be accomplished by using the 10 supplied .cm files, named [1234567890].cm. Each file contains C-
+code with a certain testing focus when used by the cm program. These test files help illustrate the capabilities and limitations
+of the program.
+
+
+Compilable Test Files
+---------------------
+
+1.cm is a copy of gcd.cm, a fully compilable and functional C- program.
+
+2.cm is a copy of sort.cm, another fully compilable and functional C- program.
+
+3.cm is a copy of fac.cm, a third fully compilable and functional C- program.
+
+4.cm is a simple, compilable and functional C- program that simply outputs 3.
+
+
+Error Test Files
+----------------
+
+5.cm is a C- file marked with 3 lexical based errors. Errors that involve invalid tokens can come in various forms. Specifically,
+in C- and in this file, unsupported/meaningless operands, unknown types and identifiers with numbers are not within the C-
+specifications, and errors involving unsupported tokens will be interpreted as an incorrect token (e.g. ints != int) or will be
+'split' and interpreted as two entities (which is likely not intended) (e.g. func2 -> func + 2).
+
+6.cm is a C- file with errors that focus on expression and statement errors (i.e. purely structural/syntactical errors). The errors
+include an invalid nonassociative sequence of relational operators, empty expressions within structures requiring a condition and
+missing semicolons that would end statements. These types of errors will normally result in compilation failure in modern compilers
+due to the lack of semantic sense.
+
+7.cm is a C- file marked with undefined and redefined errors. Errors can involve both invalid declarations and uses of variables and
+functions, whether a variable has already been defined at a scoping level, or if a variable/function had yet to be defined at the scope
+before being used. The compiler recognizes these errors and is able to continue through each error to catch multiple errors.
+
+8.cm is a C- file with errors that relates to function calling and returning. These errors relate to matching the function declaration
+parameters to any calling expression's arguments, as well as checking if any return statements correctly correspond to the current
+function's expected return. The compiler recognizes these errors and is able to continue through each error to catch multiple errors.
+
+9.cm is a C- file that illustrates various kinds of type checking errors. Control structure tests require an int type expression,
+otherwise the expression is recognized as an error. Also, assignments and operations check both left and right side expressions
+and type check for matches/mismatches. The compiler recognizes these errors and is able to continue through each error to catch
+multiple errors.
+
+0.cm is a compilable C- program that is able to easily illustrate run-time errors of array-out-of-bounds usage.
